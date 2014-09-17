@@ -3,6 +3,7 @@ quizdir=/home/chad/Public/psych
 chap(){
 score=0
 attempts=0
+
 clear
 echo -e "\n\n\n\n\n"
 echo "What chapter would you like to be quized over?"
@@ -41,7 +42,7 @@ echo $quit
     sort -R $quizdir/$chap/def > $quizdir/$chap/defrand
 #fi
 
-trap "rm $quizdir/$chap/defrand" 0 1 2 15
+trap "rm $quizdir/$chap/defrand" 0 
 #trap "echo -e "prevscore=$score\nprevattempts=$attempts\nquit=2" > $quizdir/$chap/prevscore" 15 1 2 
 linecnt=$(wc $quizdir/$chap/defrand | awk '{print $1}' | tr -d ' ') # Get line count of file
 
