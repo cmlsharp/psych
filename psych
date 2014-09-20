@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-quizdir=/home/chad/Public/psych
+quizdir=~/Public/psych
 chap(){
 score=0
 attempts=0
