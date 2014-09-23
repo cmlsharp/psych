@@ -1,114 +1,90 @@
 #!/usr/bin/env bash
-quizdir=~/Public/psych
-chap(){
-score=0
-attempts=0
+quizdir=/home/chad/Public/psych
 
-clear
-echo -e "\n\n\n\n\n"
-echo "What chapter would you like to be quized over?"
-printf "    Chapter: "
+chap(){
+    score=0
+    attempts=0
+    clear
+    echo -e "\n\n\n\n\n"
+    echo "What chapter would you like to be quized over?"
+    printf "    Chapter: "
+    eval "read chap"
+    check
 }
 
 
 check (){
-if [[ ! -d $quizdir/$chap || ! -f $quizdir/$chap/def ]]; then
-    echo "Sorry, either the chapter doesn't exist or the word list doesn't. Try again."
-    read -p "Press [Enter] to try again"
-    start
-    exit
-fi
-#if [[ -f $quizdir/$chap/prevscore ]]; then
-#    source $quizdir/$chap/prevscore 
-    #echo "The last time you played this chapter you were $prevscore out of $linecnt. Try to beat it this time!"
-#fi
-
+    if [[ ! -d $quizdir/$chap || ! -f $quizdir/$chap/def ]]; then
+        echo "Sorry, either the chapter doesn't exist or the word list doesn't. Try again."
+        read -p "Press [Enter] to try again"
+        chap
+    else
+        quiz
+    fi
 }
 
 quiz(){
-echo $quit
-#if [[ ! -z $quit  ]]; then
-#    echo "You didn't finish your game last time."
-#    printf "Continue? [Y/n]: "
-#    read cont
-#    case $cont in 
-#        ""|[Yy]|[Yy][Ee][Ss]) score=$prevscore
-#            attempts=$prevattempts
-#            ;;
-#        [Nn]|[Nn][Oo]) sort -R $quizdir/$chap/def > $quizdir/$chap/defrand 
-#            ;;
-#    esac
-#else 
+    echo $quit
     sort -R $quizdir/$chap/def > $quizdir/$chap/defrand
-#fi
 
-trap "rm $quizdir/$chap/defrand" 0 
-#trap "echo -e "prevscore=$score\nprevattempts=$attempts\nquit=2" > $quizdir/$chap/prevscore" 15 1 2 
-linecnt=$(wc $quizdir/$chap/defrand | awk '{print $1}' | tr -d ' ') # Get line count of file
+    trap "rm $quizdir/$chap/defrand" 0 
+    linecnt=$(wc $quizdir/$chap/defrand | awk '{print $1}' | tr -d ' ') # Get line count of file
 
-while [[ $attempts -lt $linecnt ]]; do
-    line=$(sed -n $(( $attempts + 1 ))p $quizdir/$chap/defrand) # Get the line number with the term and definition
-    def=$(echo $line | head -n1 | awk -F\| '{print $2}') # Extract definition from line 
-    term=$(echo $line | head -n1 | awk -F\| '{print $1}'| tr '[A-Z]' '[a-z]') # Do the same for the term echo "Definition: $def "
-    echo "Definition: $def"
-    printf "    Term: "
-    read guess
-    guess="${guess,,}" # For consistency, convert guess to lower case
-   if [[ "$guess" == "quit" ]]; then
-        clear
-        echo -e "\n\n\n\n\n"
-        if [[ $attempts -ne 0 ]]; then
-            echo "You were $score for $attempts ($(( $score * 100 / $attempts ))%)"
+    while [[ $attempts -lt $linecnt ]]; do
+        line=$(sed -n $(( $attempts + 1 ))p $quizdir/$chap/defrand) # Get the line number with the term and definition
+        def=$(echo $line | head -n1 | awk -F\| '{print $2}') # Extract definition from line 
+        term=$(echo $line | head -n1 | awk -F\| '{print $1}'| tr '[A-Z]' '[a-z]') # Do the same for the term echo "Definition: $def "
+        echo "Definition: $def"
+        printf "    Term: "
+        read guess
+        guess="${guess,,}" # For consistency, convert guess to lower case
+       if [[ "$guess" == "quit" ]]; then
+            clear
+            echo -e "\n\n\n\n\n"
+            if [[ $attempts -ne 0 ]]; then
+                echo "You were $score for $attempts ($(( $score * 100 / $attempts ))%)"
+            else
+                echo "No score available"
+            fi
+            echo "Thanks for playing"
+            exit
+        elif [[ "$guess" == "$term" ]]; then
+            clear
+            echo -e "\n\n\n\n\n"
+            echo "Correct!"
+            score=$(( $score + 1 ))
+            attempts=$(( $attempts + 1 ))
+            echo "You have completed $attempts of $linecnt"
+            echo "Percent correct: $(( $score * 100 / $attempts ))%"
         else
-            echo "No score available"
+            clear
+            echo -e "\n\n\n\n\n"
+            echo "Sorry, that is incorrect"
+            echo "The correct answer was $term"
+            attempts=$((  $attempts + 1 ))
+            echo "You have completed $attempts of $linecnt"
+            echo "Percent correct: $(( $score * 100 / $attempts ))%"
         fi
-        echo "Thanks for playing"
-#        echo -e "linecnt=$linecnt\nscore=$score\nattempts=$attempts\nquit=1" > $quizdir/$chap/prevscore
-        exit
-    elif [[ "$guess" == "$term" ]]; then
-        clear
-        echo -e "\n\n\n\n\n"
-        echo "Correct!"
-        score=$(( $score + 1 ))
-        attempts=$(( $attempts + 1 ))
-        echo "You have completed $attempts of $linecnt"
-        echo "Percent correct: $(( $score * 100 / $attempts ))%"
-    else
-        clear
-        echo -e "\n\n\n\n\n"
-        echo "Sorry, that is incorrect"
-        echo "The correct answer was $term"
-        attempts=$((  $attempts + 1 ))
-        echo "You have completed $attempts of $linecnt"
-        echo "Percent correct: $(( $score * 100 / $attempts ))%"
-    fi
-done 
-echo -e "\n\n\n\n\n"
-echo "All done!"
-echo "You were $score for $linecnt"
+    done 
+    echo -e "\n\n\n\n\n"
+    echo "All done!"
+    echo "You were $score for $linecnt"
+    again
 }
 
 again(){
-echo "Do you want to pick a new chapter? [y/N]"
-read goagain
-case $goagain in 
-    [Yy]|[Yy][Ee][Ss]) start
-        ;;
-    ""|[Nn]|[Nn][Oo]) clear
-        echo "Goodbye!"
-        exit 0
-        ;;
-    *) echo "Sorry that's not an acceptable response"
-       again
-       ;;
-esac
+    echo "Do you want to pick a new chapter? [y/N]"
+    read goagain
+    case $goagain in 
+        [Yy]|[Yy][Ee][Ss]) chap 
+            ;;
+        ""|[Nn]|[Nn][Oo]) clear
+            echo "Goodbye!"
+            exit 0
+            ;;
+        *) echo "Sorry that's not an acceptable response"
+           again
+           ;;
+    esac
 }
-
-start(){
-    chap
-    read chap
-    check
-    quiz
-    again
-}
-start
+chap
