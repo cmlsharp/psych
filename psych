@@ -31,9 +31,9 @@ quiz(){
     linecnt=$(wc $quizdir/$chap/defrand | awk '{print $1}' | tr -d ' ') # Get line count of file
 
     while [[ $attempts -lt $linecnt ]]; do
-        line=$(sed -n $(( $attempts + 1 ))p $quizdir/$chap/defrand) # Get the line number with the term and definition
-        def=$(echo $line | head -n1 | awk -F\| '{print $2}') # Extract definition from line 
-        term=$(echo $line | head -n1 | awk -F\| '{print $1}'| tr '[A-Z]' '[a-z]') # Do the same for the term echo "Definition: $def "
+        line=$(sed -n $(( $attempts + 1 ))p $quizdir/$chap/defrand) # Get the line with the term and definition
+        def=$(echo $line | awk -F\| '{print $2}') # Extract definition from line 
+        term=$(echo $line | awk -F\| '{print $1}'| tr '[A-Z]' '[a-z]') # Do the same for the term echo "Definition: $def "
         echo "Definition: $def"
         printf "    Term: "
         read guess
