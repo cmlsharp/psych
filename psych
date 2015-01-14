@@ -28,7 +28,7 @@ quiz(){
     sort -R $quizdir/$chap/def > $quizdir/$chap/defrand
 
     trap "rm $quizdir/$chap/defrand" 0 
-    linecnt=$(wc $quizdir/$chap/defrand | awk '{print $1}' | tr -d ' ') # Get line count of file
+    linecnt=$(wc -l $quizdir/$chap/defrand) # Get line count of file
 
     while [[ $attempts -lt $linecnt ]]; do
         line=$(sed -n $(( $attempts + 1 ))p $quizdir/$chap/defrand) # Get the line with the term and definition
